@@ -1,5 +1,5 @@
-from models.doctor import Doctor, DoctorUpdate, DoctorCreate
-from sqlmodel import Session
+from models.doctor import Doctor, DoctorCreate
+from sqlmodel import Session, select
 from fastapi.encoders import jsonable_encoder
 
 class CRUDDoctor():
@@ -14,6 +14,10 @@ class CRUDDoctor():
     def get_doctor_by_id(self, session:Session, id: int) -> Doctor:
         doctor = session.get(Doctor, id)
         return doctor
-
+    
+    def get_featured_doctor(self, session:Session) -> list[Doctor]:
+        statement = select(Doctor)
+        res = session.exec(statement)
+        return res
 
 doctor = CRUDDoctor()

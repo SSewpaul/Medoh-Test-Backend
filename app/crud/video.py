@@ -1,5 +1,5 @@
 from models.video import Video, VideoCreate
-from sqlmodel import Session, text
+from sqlmodel import Session, text, select, and_
 from fastapi.encoders import jsonable_encoder
 
 class CRUDVideo():
@@ -12,9 +12,14 @@ class CRUDVideo():
         return db_obj
     
     def lookup_titles(self, session:Session, query: list[str]) -> list[Video]:
-        query_arr = ''.join(f"{word}|" for word in query)
-        query_arr = (query_arr[:-1])
-        statement = text(f"SELECT * FROM Video WHERE title ~* '{query_arr}'")
+        filter_list = [Video.title.contains(word) for word in query]
+        # statement = text(f"SELECT * FROM Video WHERE title ~* '{query_arr}'")
+        statement = select(Video).filter(and_(*filter_list))
+        res = session.exec(statement)
+        return res
+    
+    def get_featured_videos(self, session: Session) -> list[Video]:
+        statement = select(Video).filter(Video.featured_video == True)
         res = session.exec(statement)
         return res
 
