@@ -25,7 +25,7 @@ def search(*, session: Session = Depends(get_session), query: str):
     if not query:
         return []
 
-    query_words = [word for word in query.split()]
+    query_words = [word.lower() for word in query.split()]
     titles_obj = crud.video.lookup_titles(session, query_words)
     search_results = []
     for val in titles_obj:
@@ -42,20 +42,21 @@ def search(*, session: Session = Depends(get_session), query: str):
 
     return search_results
 
-@router.get("/featured_videos", response_model=list[Video])
+@router.get("/featured_videos")
 def get_featured_videos(*, session: Session = Depends(get_session)):
     titles_obj = crud.video.get_featured_videos(session)
     search_results = []
     for val in titles_obj:
-        search_results.append(Video(
-            title= val.title,
-            thumbnail_url= val.thumbnail_url,
-            video_url= val.video_url,
-            video_type= val.video_type,
-            doctor_id= val.doctor_id,
-            popular_video= val.popular_video,
-            featured_video= val.featured_video,
-            id= val.id
-        ))
+
+        search_results.append({
+            "title": val.title,
+            "thumbnail_url": val.thumbnail_url,
+            "video_url": val.video_url,
+            "video_type": val.video_type,
+            "doctor_name": val.doctor.name,
+            "popular_video": val.popular_video,
+            "featured_video": val.featured_video,
+            "id": val.id
+        })
 
     return search_results
